@@ -10,7 +10,8 @@ import UIKit
 final class CoursesViewController: UITableViewController {
     
     // MARK: - Private properties
-    private let courses: [Course] = []
+    private var courses: [Course] = []
+    private let networkService = NetworkService.shared
     
     // MARK: - View's lifecycle
     override func viewDidLoad() {
@@ -24,8 +25,17 @@ final class CoursesViewController: UITableViewController {
             return
         }
         
-        URLSession.shared.dataTask(with: url) { data, response, error in
-            
+        networkService.fetchData(url: url) {[weak self] (result: Result<[Course], Error>) in
+            switch result {
+            case .success(let coursesFromJSON):
+                DispatchQueue.main.async {
+                    self?.courses = coursesFromJSON
+                    self?.tableView.reloadData()
+                }
+                
+            case .failure(let error):
+                print(error.localizedDescription)
+            }
         }
     }
 }
@@ -34,17 +44,16 @@ final class CoursesViewController: UITableViewController {
 extension CoursesViewController {
     
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        1
+        courses.count
     }
     
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "cell", for: indexPath)
         
-//        let course = courses[indexPath.row]
+        let course = courses[indexPath.row]
         
         var content = cell.defaultContentConfiguration()
-        content.text = "DK"
-//        content.text = course.name
+        content.text = course.name
 
 //        content.imageProperties.cornerRadius = tableView.rowHeight / 2
 
