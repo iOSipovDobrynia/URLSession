@@ -24,6 +24,7 @@ final class NetworkService {
                 return
             }
             
+            let responseString = NSString(data: data, encoding: String.Encoding.utf8.rawValue)
             do {
                 let decodedData = try JSONDecoder().decode(T.self, from: data)
                 
